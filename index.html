@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SimuProcess — Concentration de Jus d'Orange</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #ea580c;
+      --primary-hover: #c2410c;
+      --accent: #0284c7;
+      --success-bg: #ecfdf5;
+      --success-border: #a7f3d0;
+      --success-text: #065f46;
+      --radius: 14px;
+      --shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #fff;
+      padding: 22px 20px;
+      border-bottom: 3px solid var(--primary);
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .topbar-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(234, 88, 12, 0.18);
+      border: 1px solid rgba(251, 146, 60, 0.45);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand p {
+      margin: 2px 0 0;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+    }
+
+    .badge-db {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      color: #e2e8f0;
+    }
+
+    .workspace {
+      padding: 24px 0 44px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    @media (max-width: 1100px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .col-stack {
+      display: grid;
+      gap: 20px;
+    }
+
+    .sticky-col {
+      position: sticky;
+      top: 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .count-pill {
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    .sub-group {
+      margin-bottom: 18px;
+    }
+
+    .sub-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 12px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .field:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+      background: #fff;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .field input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-size: 0.96rem;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+      padding: 2px 0;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 24px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.99);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+      gap: 12px;
+    }
+
+    .result-tile {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .result-tile .step {
+      font-size: 0.73rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--success-text);
+      opacity: 0.85;
+    }
+
+    .result-tile .val {
+      margin-top: 5px;
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: var(--success-text);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      max-height: 72vh;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    th, td {
+      padding: 9px 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fcfcfd;
+    }
+
+    tbody tr:hover {
+      background: #fff7ed;
+    }
+
+    .empty-msg {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header cla
+<header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <div class="brand-icon">🍊</div>
+        <div>
+          <h1>SimuProcess</h1>
+          <p>Simulation des bilans de matière et d'énergie — Concentration de jus d'orange</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div class="badge-db">👤 {{ user.username if user else 'Utilisateur' }} · <strong>dusedp.db</strong></div>
+        <a href="/logout" style="background:#ef4444; color:#fff; text-decoration:none; padding:7px 14px; border-radius:999px; font-size:0.82rem; font-weight:700;">
+          Déconnexion
+        </a>
+      </div>
+    </div>
+  </header>
+  <main class="container workspace">
+    <!-- Colonne Gauche : Paramètres + Résultats -->
+    <div class="col-stack">
+      <section class="card">
+        <div class="card-header">
+          <h2>⚙️ Paramètres du Procédé</h2>
+        </div>
+
+        <form action="/calculer" method="post">
+          <div class="sub-group">
+            <div class="sub-title">Étapes 1 & 2 — Filtration & Mélange</div>
+            <div class="grid">
+              <div class="field">
+                <label>Débit initial m₀ (kg/h)</label>
+                <input type="number" step="any" name="m0" value="{{ inputs.m0 }}" required />
+              </div>
+              <div class="field">
+                <label>Taux matières solubles x₀</label>
+                <input type="number" step="any" name="x0" value="{{ inputs.x0 }}" required />
+              </div>
+              <div class="field">
+                <label>Particules insolubles (kg/h)</label>
+                <input type="number" step="any" name="residus" value="{{ inputs.residus }}" required />
+              </div>
+              <div class="field">
+                <label>Apport jus concentré mR (kg/h)</label>
+                <input type="number" step="any" name="mR" value="{{ inputs.mR }}" required />
+              </div>
+              <div class="field">
+                <label>Concentration apport xR</label>
+                <input type="number" step="any" name="xR" value="{{ inputs.xR }}" required />
+              </div>
+            </div>
+          </div>
+
+          <div class="sub-group">
+            <div class="sub-title">Étapes 3, 4 & 5 — Chauffage, Évaporation & Refroidissement</div>
+            <div class="grid">
+              <div class="field">
+                <label>Capacité calorifique Cp (kJ/kg.°C)</label>
+                <input type="number" step="any" name="Cp" value="{{ inputs.Cp }}" required />
+              </div>
+              <div class="field">
+                <label>Température entrée T₂ (°C)</label>
+                <input type="number" step="any" name="T2" value="{{ inputs.T2 }}" required />
+              </div>
+              <div class="field">
+                <label>Température chauffage T₃ (°C)</label>
+                <input type="number" step="any" name="T3" value="{{ inputs.T3 }}" required />
+              </div>
+              <div class="field">
+                <label>Concentration finale x₄</label>
+                <input type="number" step="any" name="x4" value="{{ inputs.x4 }}" required />
+              </div>
+              <div class="field">
+                <label>Chaleur latente λv (kJ/kg)</label>
+                <input type="number" step="any" name="lambda_v" value="{{ inputs.lambda_v }}" required />
+              </div>
+              <div class="field">
+                <label>Température évaporation T₄ (°C)</label>
+                <input type="number" step="any" name="T4" value="{{ inputs.T4 }}" required />
+              </div>
+              <div class="field">
+                <label>Température finale T₅ (°C)</label>
+                <input type="number" step="any" name="T5" value="{{ inputs.T5 }}" required />
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn-primary">Lancer le calcul</button>
+          </div>
+        </form>
+      </section>
+
+      {% if res %}
+      <section class="card">
+        <div class="card-header">
+          <h2>📋 Résultats de la Simulation</h2>
+        </div>
+        <div class="results-grid">
+          <div class="result-tile">
+            <div class="step">1. Filtration</div>
+            <div class="val">m₁ = {{ res.m1 }} kg/h · x₁ = {{ res.x1 }}</div>
+          </div>
+          <div class="result-tile">
+            <div class="step">2. Mélange</div>
+            <div class="val">m₂ = {{ res.m2 }} kg/h · x₂ = {{ res.x2 }} ({{ res.x2_pct }} %)</div>
+          </div>
+          <div class="result-tile">
+            <div class="step">3. Chauffage</div>
+            <div class="val">Q₃ = {{ res.Q3 }} kW</div>
+          </div>
+          <div class="result-tile">
+            <div class="step">4. Évaporation</div>
+            <div class="val">m₄ = {{ res.m4 }} kg/h · mv = {{ res.mv }} kg/h · Q₄ = {{ res.Q4 }} kW</div>
+          </div>
+          <div class="result-tile">
+            <div class="step">5. Refroidissement</div>
+            <div class="val">Q₅ = {{ res.Q5 }} kW</div>
+          </div>
+        </div>
+      </section>
+      {% endif %}
+    </div>
+
+    <!-y234 - Colonne Droite : Historique -->
+    <aside class="card sticky-col">
+      <div class="card-header">
+        <h2>📊 Historique des Simulations</h2>
+        <span class="count-pill">{{ historique|length }}</span>
+      </div>
+      {% if historique %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>m₀</th>
+              <th>x₀</th>
+              <th>Résidus</th>
+              <th>mR</th>
+              <th>xR</th>
+              <th>x₄</th>
+              <th>m₁</th>
+              <th>x₁</th>
+              <th>m₂</th>
+              <th>x₂</th>
+              <th>Q₃ (kW)</th>
+              <th>m₄</th>
+              <th>mv</th>
+              <th>Q₄ (kW)</th>
+              <th>Q₅ (kW)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in historique %}
+            <tr>
+              <td>{{ row.id }}</td>
+              <td>{{ row.m0 }}</td>
+              <td>{{ row.x0 }}</td>
+              <td>{{ row.residus }}</td>
+              <td>{{ row.mR }}</td>
+              <td>{{ row.xR }}</td>
+              <td>{{ row.x4 }}</td>
+              <td>{{ row.m1 }}</td>
+              <td>{{ row.x1 }}</td>
+              <td>{{ row.m2 }}</td>
+              <td>{{ row.x2 }}</td>
+              <td>{{ row.Q3 }}</td>
+              <td>{{ row.m4 }}</td>
+              <td>{{ row.mv }}</td>
+              <td>{{ row.Q4 }}</td>
+              <td>{{ row.Q5 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-msg">Aucune simulation enregistrée pour le moment.</div>
+      {% endif %}
+    </aside>
+  </main>
+</body>
+</html>
+https://github.com/ayaimz43-rgb/simuprocess-jus
