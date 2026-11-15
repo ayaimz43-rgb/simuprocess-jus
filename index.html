@@ -3,84 +3,116 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SimuProcess - Concentration de Jus</title>
+<title>SimuProcess - Jus | Auth Supabase</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box;font-family:system-ui,Arial,sans-serif}
-body{margin:0;background:#f1f5f9;color:#0f172a}
-header{background:#0f172a;color:#fff;padding:22px}
-header h1{margin:0;font-size:24px}
-header p{margin:4px 0 0;opacity:.8;font-size:14px}
-.wrap{max-width:1100px;margin:auto;padding:16px}
-.card{background:#fff;border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
-h2{font-size:17px;margin:0 0 14px}
-h3{font-size:13px;color:#2563eb;margin:18px 0 10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
-label{font-size:12px;color:#475569;display:block;margin-bottom:4px}
-input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:9px;font-size:14px}
-button{background:#f97316;color:#fff;border:0;padding:12px 18px;border-radius:9px;font-weight:700;cursor:pointer;width:100%;margin-top:14px;font-size:15px}
-.results{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
-.res{background:#dcfce7;border-radius:10px;padding:14px}
-.res b{display:block;font-size:12px;color:#166534;margin-bottom:6px}
-.res span{font-size:14px;font-weight:600}
-.err{background:#fee2e2;color:#991b1b;padding:10px;border-radius:9px;display:none;margin-top:10px;font-size:14px}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th,td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left;white-space:nowrap}
-.small{font-size:12px;color:#64748b}
+body{font-family:Arial;background:#fff7ed;margin:0;padding:20px}
+.card{max-width:480px;margin:auto;background:white;padding:22px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.1)}
+h1{text-align:center;color:#ea580c} h2{color:#ea580c}
+input,select{width:100%;padding:12px;margin:8px 0;border:1px solid #ddd;border-radius:10px;box-sizing:border-box}
+button{width:100%;padding:13px;background:#ea580c;color:white;border:none;border-radius:10px;font-weight:bold;cursor:pointer;margin-top:8px}
+button.secondary{background:#111827}
+.hidden{display:none}
+.result{background:#fef3c7;padding:14px;border-radius:10px;margin-top:12px}
+.histo{font-size:13px;background:#f9fafb;padding:10px;border-radius:10px;margin-top:10px}
 </style>
 </head>
 <body>
-<header><h1>🍊 SimuProcess</h1><p>Simulation des bilans de matière et d'énergie — Concentration de jus d'orange</p><p style="margin-top:8px">Utilisateur : <b>Invité</b></p></header>
-<div class="wrap">
-<div class="card">
-<h2>⚙️ Paramètres du Procédé</h2>
-<h3>Étapes 1 & 2 — Filtration & Mélange</h3>
-<div class="grid">
-<div><label>Débit initial m0 (kg/h)</label><input id="m0" type="number" step="any" value="1000"></div>
-<div><label>Taux matières solubles x0</label><input id="x0" type="number" step="any" value="0.10"></div>
-<div><label>Particules insolubles (kg/h)</label><input id="residus" type="number" step="any" value="20"></div>
-<div><label>Apport jus concentré mR (kg/h)</label><input id="mR" type="number" step="any" value="100"></div>
-<div><label>Concentration apport xR</label><input id="xR" type="number" step="any" value="0.40"></div>
+
+<div class="card" id="authCard">
+  <h1>🍊 SimuProcess - Jus</h1>
+  <p style="text-align:center">Connectez-vous avec votre Gmail</p>
+  <input id="email" type="email" placeholder="votre@gmail.com" required>
+  <input id="password" type="password" placeholder="Mot de passe (min 6 caractères)" required>
+  <button onclick="signUp()">Créer un compte - Sign Up</button>
+  <button class="secondary" onclick="signIn()">Se connecter - Sign In</button>
+  <p id="authMsg" style="color:red;text-align:center"></p>
+  <p style="font-size:12px;text-align:center;color:#666">Chaque Gmail ne peut être utilisé qu'une seule fois pour créer un compte.</p>
 </div>
-<h3>Étapes 3, 4 & 5 — Chauffage, Évaporat° & Refroidissement</h3>
-<div class="grid">
-<div><label>Capacité calorifique Cp (kJ/kg.°C)</label><input id="Cp" type="number" step="any" value="3.8"></div>
-<div><label>Température entrée T2 (°C)</label><input id="T2" type="number" step="any" value="20"></div>
-<div><label>Température chauffage T3 (°C)</label><input id="T3" type="number" step="any" value="80"></div>
-<div><label>Concentration finale x4</label><input id="x4" type="number" step="any" value="0.40"></div>
-<div><label>Chaleur latente λv (kJ/kg)</label><input id="lambda_v" type="number" step="any" value="2300"></div>
-<div><label>Température évaporat° T4 (°C)</label><input id="T4" type="number" step="any" value="80"></div>
-<div><label>Température finale T5 (°C)</label><input id="T5" type="number" step="any" value="25"></div>
+
+<div class="card hidden" id="appCard">
+  <h2>Bienvenue <span id="userEmail"></span> 👋</h2>
+  <button class="secondary" onclick="signOut()">Déconnexion</button>
+  <hr>
+  <h2>Simulation - Production de Jus</h2>
+  <label>Quantité de fruits (kg) - 100 à 10000</label>
+  <input id="fruits" type="number" min="100" max="10000" value="1000">
+  <label>Température de pasteurisation (°C) - 70 à 95</label>
+  <input id="temp" type="number" min="70" max="95" value="85">
+  <label>Durée (min) - 5 à 60</label>
+  <input id="duree" type="number" min="5" max="60" value="15">
+  <label>Sucre ajouté (%) - 0 à 20</label>
+  <input id="sucre" type="number" min="0" max="20" value="5">
+  <button onclick="simuler()">Lancer la simulation</button>
+  <div id="resultat"></div>
+  <div id="histo"></div>
 </div>
-<div id="err" class="err"></div>
-<button onclick="calculer()">Lancer le calcul</button>
-</div>
-<div class="card">
-<h2>📊 Résultats de la Simulation</h2>
-<div id="results" class="results"><p class="small">Remplissez les paramètres et cliquez sur Lancer le calcul.</p></div>
-</div>
-<div class="card">
-<h2>📜 Historique des Simulations (<span id="count">0</span>)</h2>
-<div style="overflow-x:auto"><table><thead><tr><th>#</th><th>m0</th><th>x0</th><th>Résidus</th><th>mR</th><th>xR</th><th>x4</th><th>m1</th><th>x1</th><th>m2</th><th>x2</th><th>Q3 (kW)</th><th>m4</th><th>mv</th><th>Q4 (kW)</th><th>Q5 (kW)</th></tr></thead><tbody id="histBody"></tbody></table></div>
-<p class="small" id="histEmpty">Aucune simulation enregistrée pour le moment.</p>
-<button onclick="effacer()" style="background:#e2e8f0;color:#334155">Effacer l'historique</button>
-</div>
-</div>
+
 <script>
-let hist = JSON.parse(localStorage.getItem('simu_hist')||'[]');
-function val(id){return parseFloat(document.getElementById(id).value)}
-function calculer(){
-  let m0=val('m0'),x0=val('x0'),residus=val('residus'),mR=val('mR'),xR=val('xR'),Cp=val('Cp'),T2=val('T2'),T3=val('T3'),x4=val('x4'),lambda_v=val('lambda_v'),T4=val('T4'),T5=val('T5');
-  let err=document.getElementById('err');
-  if([m0,x0,residus,mR,xR,Cp,T2,T3,x4,lambda_v,T4,T5].some(isNaN)||m0<=0||m0-residus<=0||x4<=0){err.style.display='block';err.textContent='Vérifiez les débits et concentrations (valeurs positives requises).';return;}
-  err.style.display='none';
-  let m1=m0-residus; let x1=(m0*x0)/m1; let m2=m1+mR; let x2=(m1*x1+mR*xR)/m2; let Q3=m2*Cp*(T3-T2)/3600; let m4=m2*x2/x4; let mv=m2-m4; let Q4=mv*lambda_v/3600; let Q5=m4*Cp*(T4-T5)/3600;
-  let r={m0,x0,residus,mR,xR,x4,m1:+m1.toFixed(2),x1:+x1.toFixed(4),m2:+m2.toFixed(2),x2:+x2.toFixed(4),Q3:+Q3.toFixed(2),m4:+m4.toFixed(2),mv:+mv.toFixed(2),Q4:+Q4.toFixed(2),Q5:+Q5.toFixed(2)};
-  document.getElementById('results').innerHTML=`<div class="res"><b>1. FILTRATION</b><span>m1 = ${r.m1} kg/h - x1 = ${r.x1}</span></div><div class="res"><b>2. MÉLANGE</b><span>m2 = ${r.m2} kg/h - x2 = ${r.x2} (${(x2*100).toFixed(2)} %)</span></div><div class="res"><b>3. CHAUFFAGE</b><span>Q3 = ${r.Q3} kW</span></div><div class="res"><b>4. ÉVAPORATION</b><span>m4 = ${r.m4} kg/h - mv = ${r.mv} kg/h - Q4 = ${r.Q4} kW</span></div><div class="res"><b>5. REFROIDISSEMENT</b><span>Q5 = ${r.Q5} kW</span></div>`;
-  hist.unshift(r); localStorage.setItem('simu_hist',JSON.stringify(hist)); renderHist();
+const SUPABASE_URL = "https://xslhsuojufwxugdrbeg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_RuapueeNtkkZsuMRtRWDuA_8GTP6dTk";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function signUp(){
+  const email=document.getElementById('email').value.trim();
+  const password=document.getElementById('password').value;
+  if(!email.includes('@')) return document.getElementById('authMsg').innerText="Email invalide - utilisez un Gmail valide";
+  if(password.length<6) return document.getElementById('authMsg').innerText="Mot de passe trop court (min 6)";
+  const {data,error}=await supabaseClient.auth.signUp({email,password});
+  if(error) document.getElementById('authMsg').innerText = error.message.includes('already') ? "Ce Gmail est déjà utilisé. Essayez de vous connecter." : error.message;
+  else { document.getElementById('authMsg').style.color="green"; document.getElementById('authMsg').innerText="Compte créé ! Vérifiez votre email puis connectez-vous."; }
 }
-function renderHist(){document.getElementById('count').textContent=hist.length;document.getElementById('histEmpty').style.display=hist.length?'none':'block';document.getElementById('histBody').innerHTML=hist.map((row,i)=>`<tr><td>${hist.length-i}</td><td>${row.m0}</td><td>${row.x0}</td><td>${row.residus}</td><td>${row.mR}</td><td>${row.xR}</td><td>${row.x4}</td><td>${row.m1}</td><td>${row.x1}</td><td>${row.m2}</td><td>${row.x2}</td><td>${row.Q3}</td><td>${row.m4}</td><td>${row.mv}</td><td>${row.Q4}</td><td>${row.Q5}</td></tr>`).join('');}
-function effacer(){hist=[];localStorage.removeItem('simu_hist');renderHist();}
-renderHist();
+async function signIn(){
+  const email=document.getElementById('email').value.trim();
+  const password=document.getElementById('password').value;
+  const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error) document.getElementById('authMsg').innerText="Email ou mot de passe incorrect";
+  else checkUser();
+}
+async function signOut(){ await supabaseClient.auth.signOut(); location.reload(); }
+async function checkUser(){
+  const {data:{user}}=await supabaseClient.auth.getUser();
+  if(user){
+    document.getElementById('authCard').classList.add('hidden');
+    document.getElementById('appCard').classList.remove('hidden');
+    document.getElementById('userEmail').innerText=user.email;
+    loadHisto();
+  }
+}
+async function simuler(){
+  const fruits=parseFloat(document.getElementById('fruits').value);
+  const temp=parseFloat(document.getElementById('temp').value);
+  const duree=parseFloat(document.getElementById('duree').value);
+  const sucre=parseFloat(document.getElementById('sucre').value);
+  // Validation des valeurs numériques
+  if(isNaN(fruits)||isNaN(temp)||isNaN(duree)||isNaN(sucre)) return alert("Toutes les valeurs doivent être numériques");
+  if(fruits<100||fruits>10000) return alert("Fruits doit être entre 100 et 10000 kg");
+  if(temp<70||temp>95) return alert("Température doit être entre 70 et 95°C");
+  if(duree<5||duree>60) return alert("Durée doit être entre 5 et 60 min");
+  if(sucre<0||sucre>20) return alert("Sucre doit être entre 0 et 20%");
+
+  const rendement = fruits * 0.62 * (temp>=80 ? 0.98 : 0.92);
+  const jus = Math.round(rendement);
+  const cout = Math.round(fruits*0.8 + duree*2);
+  const resultat = {fruits_kg:fruits, temperature:temp, duree_min:duree, sucre_pct:sucre, jus_litres:jus, cout_dh:cout};
+  document.getElementById('resultat').innerHTML=`<div class="result"><b>Résultat :</b><br>🥤 Jus produit : <b>${jus} L</b><br>💰 Coût estimé : <b>${cout} DH</b><br>📊 Rendement : ${(jus/fruits*100).toFixed(1)}%</div>`;
+
+  const {data:{user}}=await supabaseClient.auth.getUser();
+  if(user){
+    await supabaseClient.from('simulations').insert([{user_id:user.id, email:user.email, parametres:{fruits,temp,duree,sucre}, resultat:resultat}]);
+    loadHisto();
+  }
+}
+async function loadHisto(){
+  const {data:{user}}=await supabaseClient.auth.getUser();
+  const {data}=await supabaseClient.from('simulations').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(5);
+  if(data && data.length){
+    let html="<h3>Historique (5 dernières)</h3>";
+    data.forEach(s=>{ html+=`<div class="histo">${new Date(s.created_at).toLocaleString()} - ${s.resultat.jus_litres} L - ${s.resultat.cout_dh} DH</div>` });
+    document.getElementById('histo').innerHTML=html;
+  }
+}
+checkUser();
 </script>
 </body>
 </html>
